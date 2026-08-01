@@ -8,8 +8,8 @@
 <meta name="apple-mobile-web-app-title" content="学习工作台">
 <meta name="theme-color" content="#4CAF50">
 <meta name="description" content="植物大战僵尸主题儿童学习工作台">
-<!-- manifest removed for standalone -->
-<!-- icon removed for standalone -->
+<!-- manifest removed -->
+<!-- icon removed -->
 <script>
 // 小学一年级~六年级全部会认字（部编版）
 // 共 2146 个汉字，按年级从低到高排列
@@ -4280,11 +4280,17 @@ let _speechReady = false;
 let _zhVoice = null;
 
 // Pre-load voices — iOS Safari needs this
+// STRICTLY prefer Mandarin (zh-CN), NEVER use Cantonese (zh-HK)
 function initSpeech() {
   if (!('speechSynthesis' in window)) return;
   const voices = window.speechSynthesis.getVoices();
   if (voices.length > 0) {
-    _zhVoice = voices.find(v => v.lang.startsWith('zh-CN') || v.lang.startsWith('zh-TW') || v.lang.startsWith('zh-HK') || v.lang.startsWith('zh'));
+    // Priority: zh-CN first, then zh-TW (Taiwan Mandarin), NEVER zh-HK (Cantonese)
+    _zhVoice = voices.find(v => v.lang === 'zh-CN' || v.lang === 'zh-cn')
+           || voices.find(v => v.lang.startsWith('zh-CN') || v.lang.startsWith('zh-cn'))
+           || voices.find(v => v.lang.startsWith('zh-TW') || v.lang.startsWith('zh-tw'))
+           || voices.find(v => v.lang === 'zh' && !v.name.includes('HK') && !v.name.includes('Cantonese'))
+           || voices.find(v => v.lang.startsWith('zh') && !v.lang.includes('HK') && !v.name.includes('Cantonese') && !v.name.includes('粤'));
   }
 }
 initSpeech();
@@ -4319,13 +4325,17 @@ function speak(text, lang = 'zh-CN') {
   // Cancel any ongoing speech
   window.speechSynthesis.cancel();
 
+  // Re-init voices in case they loaded late
+  if (!_zhVoice) initSpeech();
+
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = lang;
+  // Force lang to zh-CN for all Chinese speech (never zh-HK Cantonese)
+  utterance.lang = lang.startsWith('zh') ? 'zh-CN' : lang;
   utterance.rate = lang.startsWith('zh') ? 0.8 : 0.85;
   utterance.pitch = 1.1;
   utterance.volume = 1;
 
-  // Use pre-loaded Chinese voice if available
+  // Use pre-loaded Mandarin voice if available
   if (_zhVoice && lang.startsWith('zh')) {
     utterance.voice = _zhVoice;
   }
