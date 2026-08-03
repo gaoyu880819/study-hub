@@ -549,18 +549,76 @@ const pinyinData = {
 // ENGLISH WORD BANK
 // ============================================
 const englishWords = [
+  // 基础词汇 - PVZ角色相关 (第1-2天)
   { en:'sun', zh:'太阳', emoji:'☀️', pvz:'向日葵' },
   { en:'pea', zh:'豌豆', emoji:'🫛', pvz:'豌豆射手' },
   { en:'nut', zh:'坚果', emoji:'🥜', pvz:'坚果墙' },
   { en:'flower', zh:'花', emoji:'🌸', pvz:'向日葵' },
   { en:'zombie', zh:'僵尸', emoji:'🧟', pvz:'僵尸' },
   { en:'plant', zh:'植物', emoji:'🌱', pvz:'植物' },
+  // 第3-4天
   { en:'cherry', zh:'樱桃', emoji:'🍒', pvz:'樱桃炸弹' },
   { en:'potato', zh:'土豆', emoji:'🥔', pvz:'土豆雷' },
   { en:'mushroom', zh:'蘑菇', emoji:'🍄', pvz:'蘑菇' },
   { en:'chili', zh:'辣椒', emoji:'🌶️', pvz:'辣椒' },
   { en:'garlic', zh:'大蒜', emoji:'🧄', pvz:'大蒜' },
   { en:'pumpkin', zh:'南瓜', emoji:'🎃', pvz:'南瓜头' },
+  // 第5-6天 - 自然
+  { en:'tree', zh:'树', emoji:'🌳', pvz:'大树' },
+  { en:'grass', zh:'草', emoji:'🌿', pvz:'小草' },
+  { en:'water', zh:'水', emoji:'💧', pvz:'水滴' },
+  { en:'fire', zh:'火', emoji:'🔥', pvz:'火焰' },
+  { en:'wind', zh:'风', emoji:'💨', pvz:'风' },
+  { en:'rain', zh:'雨', emoji:'🌧️', pvz:'雨' },
+  // 第7-8天 - 动物
+  { en:'bird', zh:'鸟', emoji:'🐦', pvz:'小鸟' },
+  { en:'fish', zh:'鱼', emoji:'🐟', pvz:'小鱼' },
+  { en:'rabbit', zh:'兔子', emoji:'🐰', pvz:'兔子' },
+  { en:'frog', zh:'青蛙', emoji:'🐸', pvz:'青蛙' },
+  { en:'bee', zh:'蜜蜂', emoji:'🐝', pvz:'蜜蜂' },
+  { en:'ant', zh:'蚂蚁', emoji:'🐜', pvz:'蚂蚁' },
+  // 第9-10天 - 颜色
+  { en:'red', zh:'红色', emoji:'🔴', pvz:'红色植物' },
+  { en:'blue', zh:'蓝色', emoji:'🔵', pvz:'蓝色植物' },
+  { en:'green', zh:'绿色', emoji:'🟢', pvz:'绿色植物' },
+  { en:'yellow', zh:'黄色', emoji:'🟡', pvz:'黄色植物' },
+  { en:'purple', zh:'紫色', emoji:'🟣', pvz:'紫色植物' },
+  { en:'orange', zh:'橙色', emoji:'🟠', pvz:'橙色植物' },
+  // 第11-12天 - 食物
+  { en:'apple', zh:'苹果', emoji:'🍎', pvz:'苹果' },
+  { en:'banana', zh:'香蕉', emoji:'🍌', pvz:'香蕉' },
+  { en:'grape', zh:'葡萄', emoji:'🍇', pvz:'葡萄' },
+  { en:'lemon', zh:'柠檬', emoji:'🍋', pvz:'柠檬' },
+  { en:'corn', zh:'玉米', emoji:'🌽', pvz:'玉米投手' },
+  { en:'bean', zh:'豆子', emoji:'🫘', pvz:'豆子' },
+  // 第13-14天 - 身体
+  { en:'head', zh:'头', emoji:'😀', pvz:'头' },
+  { en:'eye', zh:'眼睛', emoji:'👁️', pvz:'眼睛' },
+  { en:'hand', zh:'手', emoji:'✋', pvz:'手' },
+  { en:'foot', zh:'脚', emoji:'🦶', pvz:'脚' },
+  { en:'ear', zh:'耳朵', emoji:'👂', pvz:'耳朵' },
+  { en:'nose', zh:'鼻子', emoji:'👃', pvz:'鼻子' },
+  // 第15-16天 - 动作
+  { en:'run', zh:'跑', emoji:'🏃', pvz:'跑' },
+  { en:'jump', zh:'跳', emoji:'🤸', pvz:'跳' },
+  { en:'eat', zh:'吃', emoji:'🍽️', pvz:'吃' },
+  { en:'sleep', zh:'睡觉', emoji:'😴', pvz:'睡觉' },
+  { en:'play', zh:'玩', emoji:'🎮', pvz:'玩' },
+  { en:'grow', zh:'生长', emoji:'🌱', pvz:'生长' },
+  // 第17-18天 - 天气
+  { en:'sun', zh:'太阳', emoji:'☀️', pvz:'太阳' },
+  { en:'cloud', zh:'云', emoji:'☁️', pvz:'云' },
+  { en:'snow', zh:'雪', emoji:'❄️', pvz:'雪' },
+  { en:'star', zh:'星星', emoji:'⭐', pvz:'星星' },
+  { en:'moon', zh:'月亮', emoji:'🌙', pvz:'月亮' },
+  { en:'sky', zh:'天空', emoji:'🌌', pvz:'天空' },
+  // 第19-20天 - 数字
+  { en:'one', zh:'一', emoji:'1️⃣', pvz:'一' },
+  { en:'two', zh:'二', emoji:'2️⃣', pvz:'二' },
+  { en:'three', zh:'三', emoji:'3️⃣', pvz:'三' },
+  { en:'four', zh:'四', emoji:'4️⃣', pvz:'四' },
+  { en:'five', zh:'五', emoji:'5️⃣', pvz:'五' },
+  { en:'six', zh:'六', emoji:'6️⃣', pvz:'六' },
 ];
 
 // ============================================
@@ -697,7 +755,7 @@ function generateDailyContent() {
     }
   }
 
-  // Daily poem (unchanged)
+  // Daily poem
   const storedPoemIdx = localStorage.getItem('pvz_daily_poem_idx');
   const storedPoemDate = localStorage.getItem('pvz_daily_poem_date');
   if (storedPoemDate !== today) {
@@ -708,6 +766,23 @@ function generateDailyContent() {
     state.poemDone = [];
   } else {
     state.dailyPoemIdx = parseInt(storedPoemIdx || '0');
+  }
+
+  // Daily English words — rotate 6 words per day from the full bank
+  const storedEnIdx = localStorage.getItem('pvz_daily_en_idx');
+  const storedEnDate = localStorage.getItem('pvz_daily_en_date');
+  if (storedEnDate !== today) {
+    // Advance by 6 words each day, wrap around
+    const prevIdx = parseInt(storedEnIdx || '0');
+    const newIdx = (prevIdx + 6) % englishWords.length;
+    localStorage.setItem('pvz_daily_en_idx', newIdx);
+    localStorage.setItem('pvz_daily_en_date', today);
+    state.dailyEnglishIdx = newIdx;
+    // Reset today's English progress
+    state.englishDone = [];
+    saveState();
+  } else {
+    state.dailyEnglishIdx = parseInt(storedEnIdx || '0');
   }
 }
 
@@ -1393,7 +1468,15 @@ let englishGameState = { cards: [], flipped: [], matched: [], started: false };
 function renderEnglish() {
   const page = document.getElementById('page-english');
   if (!page) return;
+
+  // Get today's 6 English words (rotating from the full bank)
+  const enIdx = state.dailyEnglishIdx || 0;
+  const dailyEnWords = [];
+  for (let i = 0; i < 6; i++) {
+    dailyEnWords.push(englishWords[(enIdx + i) % englishWords.length]);
+  }
   const doneCount = state.englishDone.length;
+  const allDone = doneCount >= 6;
 
   page.innerHTML = `
     <div class="card">
@@ -1401,8 +1484,22 @@ function renderEnglish() {
         <span class="icon-title">🔤</span>
         <span class="title">英语单词乐园 · 植物大战僵尸角色</span>
       </div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>今日任务</span><span>${doneCount}/6</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${(doneCount/6*100)}%"></div></div>
+      </div>
+      ${allDone ? `
+        <div style="text-align:center;padding:16px;">
+          <div style="font-size:60px;">🌻🌻🌻</div>
+          <div style="font-size:18px;font-weight:bold;color:#2E7D32;margin:8px 0;">今日英语单词学习完成！</div>
+          <div style="font-size:14px;color:#757575;">豌豆射手发射的豌豆全中了！</div>
+          ${!state.calendar[state.today]?.englishClaimed ? `
+            <button class="btn btn-primary" style="margin-top:12px;" onclick="claimEnglishReward()">🌻 领取2颗阳光</button>
+          ` : '<div style="margin-top:12px;color:#4CAF50;">✅ 阳光已领取</div>'}
+        </div>
+      ` : ''}
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:16px;">
-        ${englishWords.map((w, i) => `
+        ${dailyEnWords.map((w, i) => `
           <div style="background:#fff;border-radius:12px;padding:12px;text-align:center;border:2px solid ${state.englishDone.includes(i)?'#81C784':'#E3F2FD'};cursor:pointer;"
                onclick="speakEnglishWord('${w.en}', '${w.zh}'); markEnglishWord(${i})">
             <div style="font-size:32px;">${w.emoji}</div>
@@ -1440,7 +1537,11 @@ function speakAllEnglish() {
   activateSpeech();
   window.speechSynthesis.cancel();
 
-  const words = englishWords.map(w => w.en);
+  const enIdx = state.dailyEnglishIdx || 0;
+  const words = [];
+  for (let i = 0; i < 6; i++) {
+    words.push(englishWords[(enIdx + i) % englishWords.length].en);
+  }
   let idx = 0;
   function speakNext() {
     if (idx >= words.length) return;
@@ -1463,12 +1564,28 @@ function markEnglishWord(index) {
   renderNav();
   updateGardenStatus();
   if (state.englishDone.length >= 6) {
-    showToast('🎉 英语单词学习完成！');
+    showToast('🎉 英语单词学习完成！记得领取阳光哦~');
   }
 }
 
+function claimEnglishReward() {
+  const today = state.today;
+  if (!state.calendar[today]) state.calendar[today] = {};
+  state.calendar[today].englishClaimed = true;
+  addSun(2);
+  saveState();
+  showReward('🌻 收获阳光！', '🌻', '英语单词学习完成，获得2颗阳光！豌豆射手火力全开~');
+  renderEnglish();
+  updateGardenStatus();
+}
+
 function startEnglishGame() {
-  const pairs = englishWords.slice(0, 6);
+  // Use today's 6 daily English words
+  const enIdx = state.dailyEnglishIdx || 0;
+  const pairs = [];
+  for (let i = 0; i < 6; i++) {
+    pairs.push(englishWords[(enIdx + i) % englishWords.length]);
+  }
   const cards = [...pairs, ...pairs].map((w, i) => ({
     id: i, word: w.en, emoji: w.emoji, pairId: i % pairs.length
   })).sort(() => Math.random() - 0.5);
@@ -2294,10 +2411,11 @@ function checkAllAndDefend() {
   const literacyDone = state.literacyDone.length >= (state.dailyWords.words || []).length;
   const poemDone = state.poemDone.length >= 3;
   const mathDone = state.mathDone.length >= 20;
+  const englishDone = state.englishDone.length >= 6;
   const writingDone = state.writingDone.includes(today);
   const motionDone = state.motionDone.includes(today);
 
-  if (literacyDone && poemDone && mathDone && writingDone && motionDone) {
+  if (literacyDone && poemDone && mathDone && englishDone && writingDone && motionDone) {
     if (!state.calendar[today]?.allDone) {
       markDayComplete();
     }
