@@ -44,6 +44,11 @@ body {
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
+/* Allow text selection and focus in input/textarea fields (needed for mobile keyboard) */
+input, textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
 
 /* ===== Sky Background ===== */
 .sky-bg {
@@ -1416,7 +1421,7 @@ function renderMathQuiz() {
     return `
       <div style="display:flex;align-items:center;gap:10px;padding:10px;background:${isDone?'#E8F5E9':'#fff'};border-radius:10px;margin-bottom:6px;">
         <span style="font-size:18px;font-weight:bold;min-width:80px;">${q.q}</span>
-        <input type="number" class="quiz-input" id="mathAns${q.idx}" ${isDone?'disabled':''}
+        <input type="text" inputmode="numeric" pattern="[0-9]*" class="quiz-input" id="mathAns${q.idx}" ${isDone?'disabled':''}
                onkeydown="if(event.key==='Enter')checkMathAnswer(${q.idx},${q.a})">
         ${isDone ? '<span style="color:#4CAF50;font-size:20px;">✅</span>' :
           `<button class="btn btn-green btn-sm" onclick="checkMathAnswer(${q.idx},${q.a})">检查</button>`}
