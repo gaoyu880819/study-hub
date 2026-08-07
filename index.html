@@ -1552,8 +1552,9 @@ function speakAllEnglish() {
     if (idx >= words.length) return;
     const u = new SpeechSynthesisUtterance(words[idx]);
     u.lang = 'en-US';
-    u.rate = 0.75;
+    u.rate = 0.7;
     u.pitch = 1.0;
+    if (_enVoice) u.voice = _enVoice;
     u.onend = () => { idx++; speakNext(); };
     window.speechSynthesis.speak(u);
   }
@@ -2246,9 +2247,11 @@ function renderRewardShop() {
 
 let _speechReady = false;
 let _zhVoice = null;
+let _enVoice = null;
 
 // Pre-load voices — iOS Safari needs this
 // STRICTLY prefer Mandarin (zh-CN), NEVER use Cantonese (zh-HK)
+// Also load English voice for accurate English pronunciation
 function initSpeech() {
   if (!('speechSynthesis' in window)) return;
   const voices = window.speechSynthesis.getVoices();
@@ -2259,6 +2262,15 @@ function initSpeech() {
            || voices.find(v => v.lang.startsWith('zh-TW') || v.lang.startsWith('zh-tw'))
            || voices.find(v => v.lang === 'zh' && !v.name.includes('HK') && !v.name.includes('Cantonese'))
            || voices.find(v => v.lang.startsWith('zh') && !v.lang.includes('HK') && !v.name.includes('Cantonese') && !v.name.includes('粤'));
+
+    // English voice: prefer en-US, then en-GB, then any en-* voice
+    // Ensures English words are spoken with proper English accent, not Chinese accent
+    _enVoice = voices.find(v => v.lang === 'en-US' || v.lang === 'en-us')
+           || voices.find(v => v.lang.startsWith('en-US') || v.lang.startsWith('en-us'))
+           || voices.find(v => v.lang === 'en-GB' || v.lang === 'en-gb')
+           || voices.find(v => v.lang.startsWith('en-GB') || v.lang.startsWith('en-gb'))
+           || voices.find(v => v.lang === 'en')
+           || voices.find(v => v.lang.startsWith('en'));
   }
 }
 initSpeech();
@@ -2342,27 +2354,38 @@ function speakChar(char, pinyin, group) {
 // Speak English word
 // ============================================
 function speakEnglishWord(en, zh) {
-  const text = `${en}，意思是：${zh}`;
   // Use English first then Chinese explanation
   if ('speechSynthesis' in window) {
     activateSpeech();
     window.speechSynthesis.cancel();
+    if (!_enVoice || !_zhVoice) initSpeech();
 
-    // First utterance: English word
+    // First utterance: English word (spoken twice slowly for clarity)
     const u1 = new SpeechSynthesisUtterance(en);
     u1.lang = 'en-US';
-    u1.rate = 0.8;
+    u1.rate = 0.7;   // Slower for clearer pronunciation
     u1.pitch = 1.0;
+    if (_enVoice) u1.voice = _enVoice;
 
-    // Second utterance: Chinese explanation
+    // Second utterance: Chinese meaning
     const u2 = new SpeechSynthesisUtterance(`，${zh}`);
     u2.lang = 'zh-CN';
     u2.rate = 0.8;
     u2.pitch = 1.1;
     if (_zhVoice) u2.voice = _zhVoice;
 
-    // Speak sequentially
+    // Third utterance: repeat English word once more
+    const u3 = new SpeechSynthesisUtterance(en);
+    u3.lang = 'en-US';
+    u3.rate = 0.7;
+    u3.pitch = 1.0;
+    if (_enVoice) u3.voice = _enVoice;
+
+    // Speak sequentially: English -> Chinese -> English
     u1.addEventListener('end', () => {
+      u2.addEventListener('end', () => {
+        window.speechSynthesis.speak(u3);
+      });
       window.speechSynthesis.speak(u2);
     });
 
