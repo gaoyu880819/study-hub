@@ -10,7 +10,7 @@
 <meta name="description" content="植物大战僵尸主题儿童学习工作台">
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/assets/icon-192.png">
-<script src="wordbank.js?v=20260730"></script>
+<script src="wordbank.js?v=20260808"></script>
 <title>🌻 植物大战僵尸 · 学习工作台</title>
 <style>
 /* ===== CSS Variables ===== */
@@ -500,6 +500,18 @@ const poemBank = [
   { title:'咏鹅', author:'骆宾王', scene:'🦢💧', lines:['鹅，鹅，鹅，','曲项向天歌。','白毛浮绿水，','红掌拨清波。'] },
   { title:'登鹳雀楼', author:'王之涣', scene:'🏯🌅', lines:['白日依山尽，','黄河入海流。','欲穷千里目，','更上一层楼。'] },
   { title:'画', author:'王维', scene:'🖼️🏔️', lines:['远看山有色，','近听水无声。','春去花还在，','人来鸟不惊。'] },
+  { title:'咏柳', author:'贺知章', scene:'🌳🍃', lines:['碧玉妆成一树高，','万条垂下绿丝绦。','不知细叶谁裁出，','二月春风似剪刀。'] },
+  { title:'望庐山瀑布', author:'李白', scene:'🏔️💧', lines:['日照香炉生紫烟，','遥看瀑布挂前川。','飞流直下三千尺，','疑是银河落九天。'] },
+  { title:'绝句', author:'杜甫', scene:'🐦🌨️', lines:['两个黄鹂鸣翠柳，','一行白鹭上青天。','窗含西岭千秋雪，','门泊东吴万里船。'] },
+  { title:'春夜喜雨', author:'杜甫', scene:'🌧️🌸', lines:['好雨知时节，','当春乃发生。','随风潜入夜，','润物细无声。'] },
+  { title:'游子吟', author:'孟郊', scene:'🧵👗', lines:['慈母手中线，','游子身上衣。','临行密密缝，','意恐迟迟归。'] },
+  { title:'江雪', author:'柳宗元', scene:' ❄️🎣', lines:['千山鸟飞绝，','万径人踪灭。','孤舟蓑笠翁，','独钓寒江雪。'] },
+  { title:'望天门山', author:'李白', scene:'⛰️🌊', lines:['天门中断楚江开，','碧水东流至此回。','两岸青山相对出，','孤帆一片日边来。'] },
+  { title:'池上', author:'白居易', scene:'🪷👶', lines:['小娃撑小艇，','偷采白莲回。','不解藏踪迹，','浮萍一道开。'] },
+  { title:'忆江南', author:'白居易', scene:'🌅🌸', lines:['江南好，','风景旧曾谙。','日出江花红胜火，','春来江水绿如蓝。'] },
+  { title:'鹿柴', author:'王维', scene:'🌲🌅', lines:['空山不见人，','但闻人语响。','返景入深林，','复照青苔上。'] },
+  { title:'悯农（其二）', author:'李绅', scene:'🌱🌾', lines:['春种一粒粟，','秋收万颗子。','四海无闲田，','农夫犹饿死。'] },
+  { title:'风', author:'李峤', scene:'🌬️🍃', lines:['解落三秋叶，','能开二月花。','过江千尺浪，','入竹万竿斜。'] },
 ];
 
 // ============================================
@@ -760,26 +772,28 @@ function generateDailyContent() {
     }
   }
 
-  // Daily poem
+  // Daily poem — sequential rotation (never repeats until all poems are used)
   const storedPoemIdx = localStorage.getItem('pvz_daily_poem_idx');
   const storedPoemDate = localStorage.getItem('pvz_daily_poem_date');
   if (storedPoemDate !== today) {
-    const idx = Math.floor(Math.random() * poemBank.length);
-    state.dailyPoemIdx = idx;
-    localStorage.setItem('pvz_daily_poem_idx', idx);
+    // Advance to next poem sequentially, wrap around after last one
+    const prevIdx = parseInt(storedPoemIdx || '0');
+    const newIdx = (prevIdx + 1) % poemBank.length;
+    state.dailyPoemIdx = newIdx;
+    localStorage.setItem('pvz_daily_poem_idx', newIdx);
     localStorage.setItem('pvz_daily_poem_date', today);
     state.poemDone = [];
   } else {
     state.dailyPoemIdx = parseInt(storedPoemIdx || '0');
   }
 
-  // Daily English words — rotate 6 words per day from the full bank
+  // Daily English words — rotate 8 words per day from the full bank
   const storedEnIdx = localStorage.getItem('pvz_daily_en_idx');
   const storedEnDate = localStorage.getItem('pvz_daily_en_date');
   if (storedEnDate !== today) {
-    // Advance by 6 words each day, wrap around
+    // Advance by 8 words each day, wrap around
     const prevIdx = parseInt(storedEnIdx || '0');
-    const newIdx = (prevIdx + 6) % englishWords.length;
+    const newIdx = (prevIdx + 8) % englishWords.length;
     localStorage.setItem('pvz_daily_en_idx', newIdx);
     localStorage.setItem('pvz_daily_en_date', today);
     state.dailyEnglishIdx = newIdx;
@@ -883,7 +897,7 @@ function getModuleBadge(moduleId) {
     case 'literacy': return state.literacyDone.length >= 10 ? '✓' : state.literacyDone.length || '';
     case 'poem': return state.poemDone.length >= 3 ? '✓' : '';
     case 'math': return state.mathDone.length >= 20 ? '✓' : '';
-    case 'english': return state.englishDone.length >= 6 ? '✓' : '';
+    case 'english': return state.englishDone.length >= 8 ? '✓' : '';
     case 'pinyin': return state.pinyinDone.length >= 12 ? '✓' : '';
     case 'writing': return state.writingDone.length >= 1 ? '✓' : '';
     case 'motion': return state.motionDone.length >= 1 ? '✓' : '';
@@ -1474,14 +1488,14 @@ function renderEnglish() {
   const page = document.getElementById('page-english');
   if (!page) return;
 
-  // Get today's 6 English words (rotating from the full bank)
+  // Get today's 8 English words (rotating from the full bank)
   const enIdx = state.dailyEnglishIdx || 0;
   const dailyEnWords = [];
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 8; i++) {
     dailyEnWords.push(englishWords[(enIdx + i) % englishWords.length]);
   }
   const doneCount = state.englishDone.length;
-  const allDone = doneCount >= 6;
+  const allDone = doneCount >= 8;
 
   page.innerHTML = `
     <div class="card">
@@ -1490,8 +1504,8 @@ function renderEnglish() {
         <span class="title">英语单词乐园 · 植物大战僵尸角色</span>
       </div>
       <div class="progress-wrap">
-        <div class="progress-label"><span>今日任务</span><span>${doneCount}/6</span></div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${(doneCount/6*100)}%"></div></div>
+        <div class="progress-label"><span>今日任务</span><span>${doneCount}/8</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${(doneCount/8*100)}%"></div></div>
       </div>
       ${allDone ? `
         <div style="text-align:center;padding:16px;">
@@ -1544,7 +1558,7 @@ function speakAllEnglish() {
 
   const enIdx = state.dailyEnglishIdx || 0;
   const words = [];
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 8; i++) {
     words.push(englishWords[(enIdx + i) % englishWords.length].en);
   }
   let idx = 0;
@@ -1569,7 +1583,7 @@ function markEnglishWord(index) {
   renderEnglish();
   renderNav();
   updateGardenStatus();
-  if (state.englishDone.length >= 6) {
+  if (state.englishDone.length >= 8) {
     showToast('🎉 英语单词学习完成！记得领取阳光哦~');
   }
 }
@@ -1586,7 +1600,7 @@ function claimEnglishReward() {
 }
 
 function startEnglishGame() {
-  // Use today's 6 daily English words
+  // Use first 6 of today's English words for the matching game (keep it manageable)
   const enIdx = state.dailyEnglishIdx || 0;
   const pairs = [];
   for (let i = 0; i < 6; i++) {
@@ -2439,7 +2453,7 @@ function checkAllAndDefend() {
   const literacyDone = state.literacyDone.length >= (state.dailyWords.words || []).length;
   const poemDone = state.poemDone.length >= 3;
   const mathDone = state.mathDone.length >= 20;
-  const englishDone = state.englishDone.length >= 6;
+  const englishDone = state.englishDone.length >= 8;
   const writingDone = state.writingDone.includes(today);
   const motionDone = state.motionDone.includes(today);
 
