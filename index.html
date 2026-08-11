@@ -466,6 +466,8 @@ const state = {
   writingDone: JSON.parse(localStorage.getItem('pvz_writing_done') || '[]'),
   errorBook: JSON.parse(localStorage.getItem('pvz_errors') || '[]'),
   motionDone: JSON.parse(localStorage.getItem('pvz_motion_done') || '[]'),
+  // Reward redemption history
+  rewardHistory: JSON.parse(localStorage.getItem('pvz_reward_history') || '[]'),
   // Today's content cache (regenerates daily)
   dailyWords: JSON.parse(localStorage.getItem('pvz_daily_words') || 'null'),
   dailyPoemIdx: parseInt(localStorage.getItem('pvz_daily_poem_idx') || '0'),
@@ -483,6 +485,7 @@ const modules = [
   { id: 'writing', icon: '✍️', label: '控笔', color: '#26A69A' },
   { id: 'errors', icon: '❌', label: '错题本', color: '#EF5350' },
   { id: 'motion', icon: '🏃', label: '运动饮食', color: '#66BB6A' },
+  { id: 'shop', icon: '🎁', label: '兑换', color: '#FF9800' },
 ];
 
 // ============================================
@@ -725,10 +728,18 @@ const dietTips = [
 // REWARD RULES
 // ============================================
 const rewardRules = [
-  { sun: 10, label: '🍬 兑换1次零食奖励' },
-  { sun: 30, label: '📺 兑换15分钟看电视' },
-  { sun: 100, label: '🧸 兑换1个小玩具' },
-  { sun: 200, label: '🎢 兑换1次游乐场出游' },
+  { id: 'snack',    sun: 5,   icon: '🍬', label: '小零食',       desc: '一块糖果或小饼干', category: 'food' },
+  { id: 'drink',    sun: 8,   icon: '🧃', label: '果汁饮料',     desc: '一杯鲜榨果汁',     category: 'food' },
+  { id: 'tv15',     sun: 10,  icon: '📺', label: '看电视15分钟',  desc: '看喜欢的动画片',   category: 'screen' },
+  { id: 'tv30',     sun: 20,  icon: '📺', label: '看电视30分钟',  desc: '看一集动画片',     category: 'screen' },
+  { id: 'game15',   sun: 15,  icon: '🎮', label: '玩游戏15分钟',  desc: '玩喜欢的手机游戏', category: 'screen' },
+  { id: 'game30',   sun: 30,  icon: '🎮', label: '玩游戏30分钟',  desc: '痛痛快快玩一局',   category: 'screen' },
+  { id: 'toys',     sun: 50,  icon: '🧸', label: '小玩具',       desc: '一个小玩具或盲盒', category: 'toy' },
+  { id: 'book',     sun: 50,  icon: '📖', label: '课外书',       desc: '一本喜欢的课外书', category: 'toy' },
+  { id: 'lego',     sun: 80,  icon: '🧱', label: '乐高积木',     desc: '一盒小号乐高',     category: 'toy' },
+  { id: 'park',     sun: 100, icon: '🎢', label: '游乐场',       desc: '去一次游乐场玩',   category: 'outing' },
+  { id: 'movie',    sun: 120, icon: '🎬', label: '看电影',       desc: '去电影院看一场电影', category: 'outing' },
+  { id: 'zoo',      sun: 150, icon: '🦁', label: '动物园',       desc: '去动物园看动物',   category: 'outing' },
 ];
 
 // ============================================
@@ -770,6 +781,7 @@ function saveState() {
   localStorage.setItem('pvz_writing_done', JSON.stringify(state.writingDone));
   localStorage.setItem('pvz_errors', JSON.stringify(state.errorBook));
   localStorage.setItem('pvz_motion_done', JSON.stringify(state.motionDone));
+  localStorage.setItem('pvz_reward_history', JSON.stringify(state.rewardHistory));
 }
 
 function generateDailyContent() {
@@ -965,6 +977,7 @@ function getModuleBadge(moduleId) {
     case 'pinyin': return state.pinyinDone.length >= 12 ? '✓' : '';
     case 'writing': return state.writingDone.length >= 1 ? '✓' : '';
     case 'motion': return state.motionDone.length >= 1 ? '✓' : '';
+    case 'shop': return '';
     default: return '';
   }
 }
@@ -1060,6 +1073,7 @@ function renderAllModules() {
   renderWriting();
   renderErrors();
   renderMotion();
+  renderShop();
   renderCalendar();
 }
 
@@ -2237,6 +2251,127 @@ function markMotionDone(idx) {
   renderNav();
   updateGardenStatus();
   showToast('🏃 运动打卡完成！获得2颗阳光~');
+}
+
+// ============================================
+// SHOP MODULE (兑换礼品)
+// ============================================
+
+function renderShop() {
+  const page = document.getElementById('page-shop');
+  if (!page) return;
+  const sun = state.sun;
+
+  // Group rewards by category
+  const categories = [
+    { id: 'food',   label: '🧁 美食零食', items: rewardRules.filter(r => r.category === 'food') },
+    { id: 'screen', label: '📺 屏幕时间', items: rewardRules.filter(r => r.category === 'screen') },
+    { id: 'toy',    label: '🧸 玩具好物', items: rewardRules.filter(r => r.category === 'toy') },
+    { id: 'outing', label: '🎢 出游体验', items: rewardRules.filter(r => r.category === 'outing') },
+  ];
+
+  page.innerHTML = `
+    <div class="card" style="background:linear-gradient(135deg,#FFF8E1,#FFE0B2);">
+      <div class="card-header">
+        <span class="icon-title">🎁</span>
+        <span class="title">阳光兑换商店</span>
+      </div>
+      <div style="text-align:center;padding:16px 0;">
+        <div style="font-size:60px;">🌻☀️🎁</div>
+        <div style="font-size:24px;font-weight:bold;color:#E65100;margin:8px 0;">
+          我的阳光：${sun} ☀️
+        </div>
+        <div style="font-size:13px;color:#757575;">完成每天的学习任务就能获得阳光，用阳光兑换喜欢的奖励！</div>
+      </div>
+    </div>
+
+    ${categories.map(cat => `
+      <div class="card">
+        <div class="card-header">
+          <span class="title" style="font-size:16px;">${cat.label}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;">
+          ${cat.items.map(r => {
+            const canAfford = sun >= r.sun;
+            return `
+              <div style="background:${canAfford ? '#fff' : '#f5f5f5'};border-radius:14px;padding:14px;text-align:center;border:2px solid ${canAfford ? '#FFB74D' : '#E0E0E0'};position:relative;${canAfford ? '' : 'opacity:0.6;'}">
+                <div style="font-size:40px;margin-bottom:6px;">${r.icon}</div>
+                <div style="font-size:15px;font-weight:bold;color:#333;">${r.label}</div>
+                <div style="font-size:11px;color:#888;margin:4px 0;min-height:16px;">${r.desc}</div>
+                <div style="font-size:16px;font-weight:bold;color:#FF9800;margin:6px 0;">${r.sun} ☀️</div>
+                <button class="btn ${canAfford ? 'btn-primary' : ''} btn-sm" style="${canAfford ? '' : 'background:#BDBDBD;color:#fff;'}${canAfford ? '' : 'pointer-events:none;'}"
+                        onclick="claimReward('${r.id}')">
+                  ${canAfford ? '🎁 兑换' : '阳光不足'}
+                </button>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `).join('')}
+
+    ${state.rewardHistory.length > 0 ? `
+      <div class="card">
+        <div class="card-header">
+          <span class="icon-title">📋</span>
+          <span class="title" style="font-size:16px;">兑换记录</span>
+        </div>
+        <div style="max-height:300px;overflow-y:auto;">
+          ${state.rewardHistory.slice().reverse().map(h => {
+            const r = rewardRules.find(rr => rr.id === h.id);
+            if (!r) return '';
+            return `
+              <div style="display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #f0f0f0;">
+                <span style="font-size:28px;">${r.icon}</span>
+                <div style="flex:1;">
+                  <div style="font-size:14px;font-weight:bold;">${r.label}</div>
+                  <div style="font-size:11px;color:#999;">${h.date} ${h.time}</div>
+                </div>
+                <div style="font-size:14px;font-weight:bold;color:#FF9800;">-${r.sun}☀️</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+        <div style="text-align:center;margin-top:10px;">
+          <button class="btn btn-sm" style="background:#FFCDD2;color:#C62828;" onclick="clearRewardHistory()">🗑️ 清空记录</button>
+        </div>
+      </div>
+    ` : ''}
+  `;
+}
+
+function claimReward(rewardId) {
+  const reward = rewardRules.find(r => r.id === rewardId);
+  if (!reward) return;
+  if (state.sun < reward.sun) {
+    showToast('☀️ 阳光不够哦，继续努力学习！');
+    return;
+  }
+
+  // Deduct sun
+  state.sun -= reward.sun;
+
+  // Record redemption
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+  const timeStr = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+  state.rewardHistory.push({ id: rewardId, date: dateStr, time: timeStr });
+
+  saveState();
+  updateSunDisplay();
+  renderShop();
+
+  // Show reward modal
+  showReward(`🎉 兑换成功！`, reward.icon,
+    `恭喜！用 ${reward.sun} 颗阳光兑换了「${reward.label}」！\n找爸爸妈妈领取奖励吧~ 🎁`);
+}
+
+function clearRewardHistory() {
+  if (!confirm('确定要清空兑换记录吗？')) return;
+  state.rewardHistory = [];
+  saveState();
+  renderShop();
+  showToast('✅ 兑换记录已清空');
 }
 
 // ============================================
