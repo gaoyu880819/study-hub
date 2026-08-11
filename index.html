@@ -728,18 +728,13 @@ const dietTips = [
 // REWARD RULES
 // ============================================
 const rewardRules = [
-  { id: 'snack',    sun: 5,   icon: '🍬', label: '小零食',       desc: '一块糖果或小饼干', category: 'food' },
-  { id: 'drink',    sun: 8,   icon: '🧃', label: '果汁饮料',     desc: '一杯鲜榨果汁',     category: 'food' },
-  { id: 'tv15',     sun: 10,  icon: '📺', label: '看电视15分钟',  desc: '看喜欢的动画片',   category: 'screen' },
-  { id: 'tv30',     sun: 20,  icon: '📺', label: '看电视30分钟',  desc: '看一集动画片',     category: 'screen' },
-  { id: 'game15',   sun: 15,  icon: '🎮', label: '玩游戏15分钟',  desc: '玩喜欢的手机游戏', category: 'screen' },
-  { id: 'game30',   sun: 30,  icon: '🎮', label: '玩游戏30分钟',  desc: '痛痛快快玩一局',   category: 'screen' },
-  { id: 'toys',     sun: 50,  icon: '🧸', label: '小玩具',       desc: '一个小玩具或盲盒', category: 'toy' },
-  { id: 'book',     sun: 50,  icon: '📖', label: '课外书',       desc: '一本喜欢的课外书', category: 'toy' },
-  { id: 'lego',     sun: 80,  icon: '🧱', label: '乐高积木',     desc: '一盒小号乐高',     category: 'toy' },
-  { id: 'park',     sun: 100, icon: '🎢', label: '游乐场',       desc: '去一次游乐场玩',   category: 'outing' },
-  { id: 'movie',    sun: 120, icon: '🎬', label: '看电影',       desc: '去电影院看一场电影', category: 'outing' },
-  { id: 'zoo',      sun: 150, icon: '🦁', label: '动物园',       desc: '去动物园看动物',   category: 'outing' },
+  { id: 'tv15',     sun: 200,  icon: '📺', label: '看电视15分钟',  desc: '看喜欢的动画片',   category: 'screen' },
+  { id: 'tv30',     sun: 400,  icon: '📺', label: '看电视30分钟',  desc: '看一集动画片',     category: 'screen' },
+  { id: 'game15',   sun: 300,  icon: '🎮', label: '玩游戏15分钟',  desc: '玩喜欢的手机游戏', category: 'screen' },
+  { id: 'game30',   sun: 600,  icon: '🎮', label: '玩游戏30分钟',  desc: '痛痛快快玩一局',   category: 'screen' },
+  { id: 'toys',     sun: 1000, icon: '🧸', label: '小玩具',       desc: '一个小玩具或盲盒', category: 'toy' },
+  { id: 'book',     sun: 1000, icon: '📖', label: '课外书',       desc: '一本喜欢的课外书', category: 'toy' },
+  { id: 'lego',     sun: 1600, icon: '🧱', label: '乐高积木',     desc: '一盒小号乐高',     category: 'toy' },
 ];
 
 // ============================================
@@ -2264,10 +2259,8 @@ function renderShop() {
 
   // Group rewards by category
   const categories = [
-    { id: 'food',   label: '🧁 美食零食', items: rewardRules.filter(r => r.category === 'food') },
     { id: 'screen', label: '📺 屏幕时间', items: rewardRules.filter(r => r.category === 'screen') },
     { id: 'toy',    label: '🧸 玩具好物', items: rewardRules.filter(r => r.category === 'toy') },
-    { id: 'outing', label: '🎢 出游体验', items: rewardRules.filter(r => r.category === 'outing') },
   ];
 
   page.innerHTML = `
