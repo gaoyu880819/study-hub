@@ -10,7 +10,7 @@
 <meta name="description" content="植物大战僵尸主题儿童学习工作台">
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/assets/icon-192.png">
-<script src="wordbank.js?v=20260808"></script>
+<script src="wordbank.js?v=20260811"></script>
 <title>🌻 植物大战僵尸 · 学习工作台</title>
 <style>
 /* ===== CSS Variables ===== */
@@ -2341,14 +2341,21 @@ function initSpeech() {
            || voices.find(v => v.lang === 'zh' && !v.name.includes('HK') && !v.name.includes('Cantonese'))
            || voices.find(v => v.lang.startsWith('zh') && !v.lang.includes('HK') && !v.name.includes('Cantonese') && !v.name.includes('粤'));
 
-    // English voice: prefer en-US, then en-GB, then any en-* voice
-    // Ensures English words are spoken with proper English accent, not Chinese accent
-    _enVoice = voices.find(v => v.lang === 'en-US' || v.lang === 'en-us')
+    // English voice: prefer high-quality en-US voices
+    // Search by name first (Google/Microsoft voices tend to be better quality)
+    _enVoice = voices.find(v => (v.lang === 'en-US' || v.lang === 'en-us') && v.name.includes('Google'))
+           || voices.find(v => (v.lang === 'en-US' || v.lang === 'en-us') && v.name.includes('Microsoft'))
+           || voices.find(v => (v.lang === 'en-US' || v.lang === 'en-us') && v.name.includes('Samantha'))
+           || voices.find(v => (v.lang === 'en-US' || v.lang === 'en-us') && v.name.includes('Alex'))
+           || voices.find(v => v.lang === 'en-US' || v.lang === 'en-us')
            || voices.find(v => v.lang.startsWith('en-US') || v.lang.startsWith('en-us'))
            || voices.find(v => v.lang === 'en-GB' || v.lang === 'en-gb')
            || voices.find(v => v.lang.startsWith('en-GB') || v.lang.startsWith('en-gb'))
            || voices.find(v => v.lang === 'en')
            || voices.find(v => v.lang.startsWith('en'));
+
+    // Debug: log available voices for troubleshooting
+    console.log('Speech voices loaded:', voices.length, '| EN voice:', _enVoice?.name, '| ZH voice:', _zhVoice?.name);
   }
 }
 initSpeech();
@@ -2433,44 +2440,59 @@ function speakChar(char, pinyin, group) {
 // ============================================
 function speakEnglishWord(en, zh) {
   // Use English first then Chinese explanation
-  if ('speechSynthesis' in window) {
-    activateSpeech();
-    window.speechSynthesis.cancel();
-    if (!_enVoice || !_zhVoice) initSpeech();
-
-    // First utterance: English word (spoken twice slowly for clarity)
-    const u1 = new SpeechSynthesisUtterance(en);
-    u1.lang = 'en-US';
-    u1.rate = 0.7;   // Slower for clearer pronunciation
-    u1.pitch = 1.0;
-    if (_enVoice) u1.voice = _enVoice;
-
-    // Second utterance: Chinese meaning
-    const u2 = new SpeechSynthesisUtterance(`，${zh}`);
-    u2.lang = 'zh-CN';
-    u2.rate = 0.8;
-    u2.pitch = 1.1;
-    if (_zhVoice) u2.voice = _zhVoice;
-
-    // Third utterance: repeat English word once more
-    const u3 = new SpeechSynthesisUtterance(en);
-    u3.lang = 'en-US';
-    u3.rate = 0.7;
-    u3.pitch = 1.0;
-    if (_enVoice) u3.voice = _enVoice;
-
-    // Speak sequentially: English -> Chinese -> English
-    u1.addEventListener('end', () => {
-      u2.addEventListener('end', () => {
-        window.speechSynthesis.speak(u3);
-      });
-      window.speechSynthesis.speak(u2);
-    });
-
-    window.speechSynthesis.speak(u1);
-  } else {
+  if (!('speechSynthesis' in window)) {
     showToast('⚠️ 当前浏览器不支持语音');
+    return;
   }
+  activateSpeech();
+  window.speechSynthesis.cancel();
+
+  // Force reload voices if not loaded yet
+  if (!_enVoice || !_zhVoice) initSpeech();
+
+  // If still no voices, retry after a short delay (iOS Safari loads voices async)
+  if (!_enVoice && window.speechSynthesis.getVoices().length === 0) {
+    showToast('🔊 正在加载语音引擎...');
+    window.speechSynthesis.addEventListener('voiceschanged', () => {
+      initSpeech();
+      speakEnglishWord(en, zh);
+    }, { once: true });
+    return;
+  }
+
+  // First utterance: English word (slow for clarity)
+  const u1 = new SpeechSynthesisUtterance(en);
+  u1.lang = 'en-US';
+  u1.rate = 0.7;
+  u1.pitch = 1.0;
+  u1.volume = 1;
+  if (_enVoice) u1.voice = _enVoice;
+
+  // Second utterance: Chinese meaning
+  const u2 = new SpeechSynthesisUtterance(`，${zh}`);
+  u2.lang = 'zh-CN';
+  u2.rate = 0.8;
+  u2.pitch = 1.1;
+  u2.volume = 1;
+  if (_zhVoice) u2.voice = _zhVoice;
+
+  // Third utterance: repeat English word
+  const u3 = new SpeechSynthesisUtterance(en);
+  u3.lang = 'en-US';
+  u3.rate = 0.7;
+  u3.pitch = 1.0;
+  u3.volume = 1;
+  if (_enVoice) u3.voice = _enVoice;
+
+  // Speak sequentially: English -> Chinese -> English
+  u1.addEventListener('end', () => {
+    u2.addEventListener('end', () => {
+      window.speechSynthesis.speak(u3);
+    });
+    window.speechSynthesis.speak(u2);
+  });
+
+  window.speechSynthesis.speak(u1);
 }
 
 // ============================================
@@ -2548,13 +2570,25 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(updateGardenStatus, 30000);
 });
 
-// Service Worker for PWA
+// Service Worker for PWA - auto-update on every visit
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then(reg => {
       console.log('SW registered:', reg.scope);
+      // Check for SW updates every 30 seconds
+      setInterval(() => {
+        reg.update();
+      }, 30000);
     }).catch(err => {
       console.log('SW registration failed:', err);
+    });
+
+    // When a new SW takes control, reload page immediately to get latest content
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
     });
   });
 }
